@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Widgets",
+  "FriendlyName": "Instant Checkout",
+  "SystemName": "Widgets.InstantCheckout",
+  "Version": "1.00",
+  "SupportedVersions": [ "4.20" ],
+  "Author": "Stamp team",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Widgets.InstantCheckout.dll",
+  "Description": "This plugin allows you to use Instant Checkout"
+}

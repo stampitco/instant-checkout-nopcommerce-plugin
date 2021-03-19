@@ -1,0 +1,77 @@
+﻿@model Nop.Plugin.Widgets.InstantCheckout.Models.ConfigurationModel
+
+@{
+    Layout = "_ConfigurePlugin";
+}
+
+@await Component.InvokeAsync("StoreScopeConfiguration")
+<form asp-controller="WidgetsInstantCheckout" asp-action="Configure" method="post">
+    <div class="panel-group">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Instant Checkout Configurations
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-override-store-checkbox asp-for="MerchantId_OverrideForStore" asp-input="MerchantId" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="MerchantId" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="MerchantId" />
+                        <span asp-validation-for="MerchantId"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-override-store-checkbox asp-for="InstantCheckoutWebBaseUrl_OverrideForStore" asp-input="InstantCheckoutWebBaseUrl" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="InstantCheckoutWebBaseUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="InstantCheckoutWebBaseUrl" />
+                        <span asp-validation-for="InstantCheckoutWebBaseUrl"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-override-store-checkbox asp-for="InstantCheckoutApiBaseUrl_OverrideForStore" asp-input="InstantCheckoutApiBaseUrl" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="InstantCheckoutApiBaseUrl" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="InstantCheckoutApiBaseUrl" />
+                        <span asp-validation-for="InstantCheckoutApiBaseUrl"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-override-store-checkbox asp-for="ConsumerKey_OverrideForStore" asp-input="ConsumerKey" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="ConsumerKey" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="ConsumerKey" />
+                        <span asp-validation-for="ConsumerKey"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-3">
+                        <nop-override-store-checkbox asp-for="ConsumerSecret_OverrideForStore" asp-input="ConsumerSecret" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+                        <nop-label asp-for="ConsumerSecret" />
+                    </div>
+                    <div class="col-md-9">
+                        <nop-editor asp-for="ConsumerSecret" />
+                        <span asp-validation-for="ConsumerSecret"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="form-group">
+                    <div class="col-md-9 col-md-offset-3">
+                        <input type="submit" name="save" class="btn bg-blue" value="@T("Admin.Common.Save")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

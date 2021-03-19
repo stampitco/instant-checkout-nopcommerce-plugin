@@ -1,0 +1,20 @@
+﻿@model Nop.Plugin.Widgets.InstantCheckout.Models.PublicInfoModel
+@{
+    Layout = "";
+
+    Html.AddScriptParts(ResourceLocation.Footer, "~/Plugins/Widgets.InstantCheckout/Scripts/index.js");
+    Html.AddCssFileParts("~/Plugins/Widgets.InstantCheckout/Content/instantcheckout/instant-checkout.css");
+}
+
+
+<div id="stamp-ic-checkout-section">
+
+    <input id="stamp-ic-merchant-id" asp-for="MerchantId" type="hidden" />
+    <input id="stamp-ic-base-url" asp-for="InstantCheckoutBaseUrl" type="hidden" />
+
+    <button data-product-id="@Model.ProductId" class="button-@Model.ProductId add-to-cart-button stamp-ic-checkout-button" id="stamp-ic-checkout-button"
+            type="button" style="display:block;margin-bottom:15px;">
+        Instant Checkout
+    </button>
+
+</div>
