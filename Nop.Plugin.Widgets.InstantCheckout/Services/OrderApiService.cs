@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using Nop.Core.Data;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Domain.Payments;
@@ -26,11 +27,11 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Services
                         orderby order.Id
                         select order;
 
-            return new ApiList<Order>(query, 0, Configurations.MaxLimit);
+            return new ApiList<Order>(query, 0, Configurations.MAX_LIMIT);
         }
 
         public IList<Order> GetOrders(IList<int> ids = null, DateTime? createdAtMin = null, DateTime? createdAtMax = null,
-           int limit = Configurations.DefaultLimit, int page = Configurations.DefaultPageValue, int sinceId = Configurations.DefaultSinceId,
+           int limit = Configurations.DEFAULT_LIMIT, int page = Configurations.DEFAULT_PAGE_VALUE, int sinceId = Configurations.DEFAULT_SINCE_ID,
            OrderStatus? status = null, PaymentStatus? paymentStatus = null, ShippingStatus? shippingStatus = null, int? customerId = null,
            int? storeId = null)
         {
@@ -119,16 +120,13 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Services
 
             query = query.OrderBy(order => order.Id);
 
-            //query = query.Include(c => c.Customer);
-            //query = query.Include(c => c.BillingAddress);
-            //query = query.Include(c => c.ShippingAddress);
-            //query = query.Include(c => c.PickupAddress);
-            //query = query.Include(c => c.RedeemedRewardPointsEntry);
-            //query = query.Include(c => c.DiscountUsageHistory);
-            //query = query.Include(c => c.GiftCardUsageHistory);
-            //query = query.Include(c => c.OrderNotes);
-            //query = query.Include(c => c.OrderItems);
-            //query = query.Include(c => c.Shipments);
+            query = query.Include(c => c.Customer);
+            query = query.Include(c => c.BillingAddress);
+            query = query.Include(c => c.ShippingAddress);
+            query = query.Include(c => c.PickupAddress);
+            query = query.Include(c => c.OrderNotes);
+            query = query.Include(c => c.OrderItems);
+            query = query.Include(c => c.Shipments);
 
             return query;
         }

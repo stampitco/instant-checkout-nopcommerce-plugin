@@ -46,8 +46,6 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
         private readonly IOrderTotalCalculationService _orderTotalCalculationService;
         private readonly ITaxService _taxService;
         private readonly ICurrencyService _currencyService;
-        private readonly IPriceFormatter _priceFormatter;
-        private readonly IDTOHelper _dtoHelper;
         private readonly ILocalizationService _localizationService;
 
         public ShippingsController(IJsonFieldsSerializer jsonFieldsSerializer,
@@ -83,8 +81,6 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
             _orderTotalCalculationService = orderTotalCalculationService;
             _taxService = taxService;
             _currencyService = currencyService;
-            _priceFormatter = priceFormatter;
-            _dtoHelper = dtoHelper;
             _localizationService = localizationService;
             _shippingSettings = shippingSettings;
         }
@@ -129,7 +125,7 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
             }
 
             var allProducts = _productApiService.GetProducts(parameters.Ids)
-                                    .Where(p => StoreMappingService.Authorize(p));
+                                    .Where(p => _storeMappingService.Authorize(p));
 
             var cart = new List<ShoppingCartItem> { };
 

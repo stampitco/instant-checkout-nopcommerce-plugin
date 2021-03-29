@@ -52,7 +52,13 @@ Checkout.prototype.onCheckoutButtonClick = async function onCheckoutButtonClick(
   this.mediator.publish(GET_CHECKOUT_URL_STARTED, params);
 
   try {
-    const checkoutUrl = `${params.ic_base_url}?productId=${params.product_id}&sku=&quantity=${params.qty}&appKey=${params.app_id}`;
+    let checkoutUrl = '';
+    if (params.product_id) {
+      checkoutUrl = `${params.ic_base_url}?productId=${params.product_id}&sku=&quantity=${params.qty}&appKey=${params.app_id}`;
+    } else {
+      checkoutUrl = encodeURI(`${params.ic_base_url}?products=${JSON.stringify(params.products)}&appKey=${params.app_id}`);
+    }
+    
     const result = { checkout_url: checkoutUrl };
     this.$button.trigger(GET_CHECKOUT_URL_SUCCESS, [params, result]);
     this.mediator.publish(GET_CHECKOUT_URL_SUCCESS, params, result);
@@ -75,36 +81,43 @@ Checkout.prototype.enableButtonLoading = function enableButtonLoading() {
 
 Checkout.prototype.getCheckoutParams = function getCheckoutParams() {
 
-  const $cartForm = this.$button.parents('#stamp-ic-checkout-section');
+  const $cartForm = this.$button.closest('#stamp-ic-checkout-section');
 
   if ($cartForm.length === 0) {
+
     if (this.debug) {
       console.error('Instant Checkout: Cart form html element missing');
     }
     return false;
   }
 
-  const qty = parseInt($('input.qty-input').val());
+  const isCart = $cartForm.find('#stamp-ic-is-cart').val();
 
-  if (!qty) {
-    if (this.debug) {
-      console.error('Instant Checkout: Product Qty is empty');
+  let qty = 0;
+  if (isCart == "False") {
+    qty = parseInt($('input.qty-input').val());
+
+    if (!qty) {
+      if (this.debug) {
+        console.error('Instant Checkout: Product Qty is empty');
+      }
+      this.$button.trigger(
+        GET_CHECKOUT_URL_ERROR,
+        [
+          {
+            errors: [
+              {
+                param: 'qty',
+                message: 'stamp_ic_wc_qty_param_empty'
+              }
+            ]
+          }
+        ]
+      );
+      return false;
     }
-    this.$button.trigger(
-      GET_CHECKOUT_URL_ERROR,
-      [
-        {
-          errors: [
-            {
-              param: 'qty',
-              message: 'stamp_ic_wc_qty_param_empty'
-            }
-          ]
-        }
-      ]
-    );
-    return false;
   }
+
 
   const ic_base_url = $cartForm.find('#stamp-ic-base-url').val();
   const app_id = $cartForm.find('#stamp-ic-merchant-id').val();
@@ -113,36 +126,10 @@ Checkout.prototype.getCheckoutParams = function getCheckoutParams() {
   const data = {
     app_id,
     ic_base_url,
-    product_id: this.$button.data('product-id'),
+    product_id: this.$button.data('product-id') || null,
+    products: this.$button.data('products-ids') || null,
     qty,
   };
-
-  //if ($cartForm.hasClass('variations_form')) {
-
-  //  const variation_id = parseInt($cartForm.find('input[name="variation_id"]').val());
-
-  //  if (!variation_id) {
-  //    if (this.debug) {
-  //      console.error('Instant Checkout: Product Variation is empty');
-  //    }
-  //    this.$button.trigger(
-  //      GET_CHECKOUT_URL_ERROR,
-  //      [
-  //        {
-  //          errors: [
-  //            {
-  //              param: 'variation_id',
-  //              message: 'stamp_ic_wc_variation_id_param_empty'
-  //            }
-  //          ]
-  //        }
-  //      ]
-  //    );
-  //    return false;
-  //  }
-
-  //  data['variation_id'] = variation_id;
-  //}
 
   return data;
 };
@@ -333,7 +320,7 @@ Mediator.prototype.publish = function publish(topic) {
 
 $(function () {
 
-  const $checkoutButton = $('.stamp-ic-checkout-button');
+  const $checkoutButton = $('#stamp-ic-checkout-button');
   const stampIcCheckout = {
     overlay: {
       linkText: "Click here",

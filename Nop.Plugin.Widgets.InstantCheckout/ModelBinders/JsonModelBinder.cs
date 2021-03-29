@@ -137,11 +137,11 @@ namespace Nop.Plugin.Widgets.InstantCheckout.ModelBinders
             {
                 foreach (var invalidProperty in typeValidator.InvalidProperties)
                 {
-                    var key = string.Format(_localizationService.GetResource("Api.InvalidType", _languageId, false), invalidProperty);
+                    var key = string.Format("Invalid {0} type", invalidProperty);
 
                     if (!errors.ContainsKey(key))
                     {
-                        errors.Add(key, _localizationService.GetResource("Api.InvalidPropertyType", _languageId, false));
+                        errors.Add(key, "Invalid Property Type");
                     }
                 }
             }

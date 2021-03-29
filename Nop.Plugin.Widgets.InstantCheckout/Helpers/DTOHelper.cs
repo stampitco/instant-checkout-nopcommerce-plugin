@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Nop.Core.Domain.Catalog;
-using Nop.Core.Domain.Directory;
 using Nop.Core.Domain.Media;
 using Nop.Core.Domain.Orders;
 using Nop.Plugin.Widgets.InstantCheckout.DTOs.Images;
@@ -12,7 +11,6 @@ using Nop.Plugin.Widgets.InstantCheckout.DTOs.Products;
 using Nop.Plugin.Widgets.InstantCheckout.MappingExtensions;
 using Nop.Plugin.Widgets.InstantCheckout.Services;
 using Nop.Services.Catalog;
-using Nop.Services.Directory;
 using Nop.Services.Localization;
 using Nop.Services.Media;
 using Nop.Services.Security;
@@ -24,17 +22,13 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Helpers
     public class DTOHelper : IDTOHelper
     {
         private readonly IAclService _aclService;
-        private readonly ICurrencyService _currencyService;
-        private readonly CurrencySettings _currencySettings;
         private readonly ILanguageService _languageService;
         private readonly ILocalizationService _localizationService;
         private readonly IPictureService _pictureService;
         private readonly IProductAttributeConverter _productAttributeConverter;
-        private readonly IProductAttributeService _productAttributeService;
         private readonly IProductService _productService;
         private readonly IProductTagService _productTagService;
         private readonly IStoreMappingService _storeMappingService;
-        private readonly IStoreService _storeService;
         private readonly IUrlRecordService _urlRecordService;
         private readonly ICustomerApiService _customerApiService;
 
@@ -42,12 +36,8 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Helpers
             IAclService aclService,
             IStoreMappingService storeMappingService,
             IPictureService pictureService,
-            IProductAttributeService productAttributeService,
             IProductAttributeConverter productAttributeConverter,
             ILanguageService languageService,
-            ICurrencyService currencyService,
-            CurrencySettings currencySettings,
-            IStoreService storeService,
             ILocalizationService localizationService,
             IUrlRecordService urlRecordService,
             IProductTagService productTagService,
@@ -57,12 +47,8 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Helpers
             _aclService = aclService;
             _storeMappingService = storeMappingService;
             _pictureService = pictureService;
-            _productAttributeService = productAttributeService;
             _productAttributeConverter = productAttributeConverter;
             _languageService = languageService;
-            _currencyService = currencyService;
-            _currencySettings = currencySettings;
-            _storeService = storeService;
             _localizationService = localizationService;
             _urlRecordService = urlRecordService;
             _productTagService = productTagService;
@@ -107,42 +93,6 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Helpers
             return productDto;
         }
 
-        //public CategoryDto PrepareCategoryDTO(Category category)
-        //{
-        //    var categoryDto = category.ToDto();
-
-        //    var picture = _pictureService.GetPictureById(category.PictureId);
-        //    var imageDto = PrepareImageDto(picture);
-
-        //    if (imageDto != null)
-        //    {
-        //        categoryDto.Image = imageDto;
-        //    }
-
-        //    categoryDto.SeName = _urlRecordService.GetSeName(category);
-        //    categoryDto.DiscountIds = category.AppliedDiscounts.Select(discount => discount.Id).ToList();
-        //    categoryDto.RoleIds = _aclService.GetAclRecords(category).Select(acl => acl.CustomerRoleId).ToList();
-        //    categoryDto.StoreIds = _storeMappingService.GetStoreMappings(category).Select(mapping => mapping.StoreId)
-        //        .ToList();
-
-        //    var allLanguages = _languageService.GetAllLanguages();
-
-        //    categoryDto.LocalizedNames = new List<LocalizedNameDto>();
-
-        //    foreach (var language in allLanguages)
-        //    {
-        //        var localizedNameDto = new LocalizedNameDto
-        //        {
-        //            LanguageId = language.Id,
-        //            LocalizedName = _localizationService.GetLocalized(category, x => x.Name, language.Id)
-        //        };
-
-        //        categoryDto.LocalizedNames.Add(localizedNameDto);
-        //    }
-
-        //    return categoryDto;
-        //}
-
         public OrderDto PrepareOrderDTO(Order order)
         {
             var orderDto = order.ToDto();
@@ -159,15 +109,6 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Helpers
             return orderDto;
         }
 
-        //public ShoppingCartItemDto PrepareShoppingCartItemDTO(ShoppingCartItem shoppingCartItem)
-        //{
-        //    var dto = shoppingCartItem.ToDto();
-        //    dto.ProductDto = PrepareProductDTO(shoppingCartItem.Product);
-        //    dto.CustomerDto = shoppingCartItem.Customer.ToCustomerForShoppingCartItemDto();
-        //    dto.Attributes = _productAttributeConverter.Parse(shoppingCartItem.AttributesXml);
-        //    return dto;
-        //}
-
         public OrderItemDto PrepareOrderItemDTO(OrderItem orderItem)
         {
             var dto = orderItem.ToDto();
@@ -175,42 +116,6 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Helpers
             dto.Attributes = _productAttributeConverter.Parse(orderItem.AttributesXml);
             return dto;
         }
-
-        //public StoreDto PrepareStoreDTO(Store store)
-        //{
-        //    var storeDto = store.ToDto();
-
-        //    var primaryCurrency = _currencyService.GetCurrencyById(_currencySettings.PrimaryStoreCurrencyId);
-
-        //    if (!string.IsNullOrEmpty(primaryCurrency.DisplayLocale))
-        //    {
-        //        storeDto.PrimaryCurrencyDisplayLocale = primaryCurrency.DisplayLocale;
-        //    }
-
-        //    storeDto.LanguageIds = _languageService.GetAllLanguages(false, store.Id).Select(x => x.Id).ToList();
-
-        //    return storeDto;
-        //}
-
-        //public LanguageDto PrepateLanguageDto(Language language)
-        //{
-        //    var languageDto = language.ToDto();
-
-        //    languageDto.StoreIds = _storeMappingService.GetStoreMappings(language).Select(mapping => mapping.StoreId)
-        //        .ToList();
-
-        //    if (languageDto.StoreIds.Count == 0)
-        //    {
-        //        languageDto.StoreIds = _storeService.GetAllStores().Select(s => s.Id).ToList();
-        //    }
-
-        //    return languageDto;
-        //}
-
-        //public ProductAttributeDto PrepareProductAttributeDTO(ProductAttribute productAttribute)
-        //{
-        //    return productAttribute.ToDto();
-        //}
 
         private void PrepareProductImages(IEnumerable<ProductPicture> productPictures, ProductDto productDto)
         {
@@ -257,166 +162,5 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Helpers
 
             return image;
         }
-
-        //private void PrepareProductAttributes(IEnumerable<ProductAttributeMapping> productAttributeMappings,
-        //    ProductDto productDto)
-        //{
-        //    if (productDto.ProductAttributeMappings == null)
-        //    {
-        //        productDto.ProductAttributeMappings = new List<ProductAttributeMappingDto>();
-        //    }
-
-        //    foreach (var productAttributeMapping in productAttributeMappings)
-        //    {
-        //        var productAttributeMappingDto =
-        //            PrepareProductAttributeMappingDto(productAttributeMapping);
-
-        //        if (productAttributeMappingDto != null)
-        //        {
-        //            productDto.ProductAttributeMappings.Add(productAttributeMappingDto);
-        //        }
-        //    }
-        //}
-
-        //private ProductAttributeMappingDto PrepareProductAttributeMappingDto(
-        //    ProductAttributeMapping productAttributeMapping)
-        //{
-        //    ProductAttributeMappingDto productAttributeMappingDto = null;
-
-        //    if (productAttributeMapping != null)
-        //    {
-        //        productAttributeMappingDto = new ProductAttributeMappingDto
-        //        {
-        //            Id = productAttributeMapping.Id,
-        //            ProductAttributeId = productAttributeMapping.ProductAttributeId,
-        //            ProductAttributeName = _productAttributeService
-        //                .GetProductAttributeById(productAttributeMapping.ProductAttributeId).Name,
-        //            TextPrompt = productAttributeMapping.TextPrompt,
-        //            DefaultValue = productAttributeMapping.DefaultValue,
-        //            AttributeControlTypeId = productAttributeMapping.AttributeControlTypeId,
-        //            DisplayOrder = productAttributeMapping.DisplayOrder,
-        //            IsRequired = productAttributeMapping.IsRequired,
-        //            ProductAttributeValues = productAttributeMapping.ProductAttributeValues
-        //                .Select(x => PrepareProductAttributeValueDto(x, productAttributeMapping.Product)).ToList()
-        //        };
-        //    }
-
-        //    return productAttributeMappingDto;
-        //}
-
-        //private ProductAttributeValueDto PrepareProductAttributeValueDto(ProductAttributeValue productAttributeValue,
-        //    Product product)
-        //{
-        //    ProductAttributeValueDto productAttributeValueDto = null;
-
-        //    if (productAttributeValue != null)
-        //    {
-        //        productAttributeValueDto = productAttributeValue.ToDto();
-        //        if (productAttributeValue.ImageSquaresPictureId > 0)
-        //        {
-        //            var imageSquaresPicture =
-        //                _pictureService.GetPictureById(productAttributeValue.ImageSquaresPictureId);
-        //            var imageDto = PrepareImageDto(imageSquaresPicture);
-        //            productAttributeValueDto.ImageSquaresImage = imageDto;
-        //        }
-
-        //        if (productAttributeValue.PictureId > 0)
-        //        {
-        //            // make sure that the picture is mapped to the product
-        //            // This is needed since if you delete the product picture mapping from the nopCommerce administrationthe
-        //            // then the attribute value is not updated and it will point to a picture that has been deleted
-        //            var productPicture =
-        //                product.ProductPictures.FirstOrDefault(pp => pp.PictureId == productAttributeValue.PictureId);
-        //            if (productPicture != null)
-        //            {
-        //                productAttributeValueDto.ProductPictureId = productPicture.Id;
-        //            }
-        //        }
-        //    }
-
-        //    return productAttributeValueDto;
-        //}
-
-        //private void PrepareProductAttributeCombinations(IEnumerable<ProductAttributeCombination> productAttributeCombinations,
-        //    ProductDto productDto)
-        //{
-        //    productDto.ProductAttributeCombinations = productDto.ProductAttributeCombinations ?? new List<ProductAttributeCombinationDto>();
-
-        //    foreach (var productAttributeCombination in productAttributeCombinations)
-        //    {
-        //        var productAttributeCombinationDto = PrepareProductAttributeCombinationDto(productAttributeCombination);
-        //        if (productAttributeCombinationDto != null)
-        //        {
-        //            productDto.ProductAttributeCombinations.Add(productAttributeCombinationDto);
-        //        }
-        //    }
-        //}
-
-        //private ProductAttributeCombinationDto PrepareProductAttributeCombinationDto(ProductAttributeCombination productAttributeCombination)
-        //{
-        //    return productAttributeCombination.ToDto();
-        //}
-
-        //public void PrepareProductSpecificationAttributes(IEnumerable<ProductSpecificationAttribute> productSpecificationAttributes, ProductDto productDto)
-        //{
-        //    if (productDto.ProductSpecificationAttributes == null)
-        //        productDto.ProductSpecificationAttributes = new List<ProductSpecificationAttributeDto>();
-
-        //    foreach (var productSpecificationAttribute in productSpecificationAttributes)
-        //    {
-        //        ProductSpecificationAttributeDto productSpecificationAttributeDto = PrepareProductSpecificationAttributeDto(productSpecificationAttribute);
-
-        //        if (productSpecificationAttributeDto != null)
-        //        {
-        //            productDto.ProductSpecificationAttributes.Add(productSpecificationAttributeDto);
-        //        }
-        //    }
-        //}
-
-        //public ProductSpecificationAttributeDto PrepareProductSpecificationAttributeDto(ProductSpecificationAttribute productSpecificationAttribute)
-        //{
-        //    return productSpecificationAttribute.ToDto();
-        //}
-
-        //public SpecificationAttributeDto PrepareSpecificationAttributeDto(SpecificationAttribute specificationAttribute)
-        //{
-        //    return specificationAttribute.ToDto();
-        //}
-
-        //public ManufacturerDto PrepareManufacturerDto(Manufacturer manufacturer)
-        //{
-        //    var manufacturerDto = manufacturer.ToDto();
-
-        //    var picture = _pictureService.GetPictureById(manufacturer.PictureId);
-        //    var imageDto = PrepareImageDto(picture);
-
-        //    if (imageDto != null)
-        //    {
-        //        manufacturerDto.Image = imageDto;
-        //    }
-
-        //    manufacturerDto.SeName = _urlRecordService.GetSeName(manufacturer);
-        //    manufacturerDto.DiscountIds = manufacturer.AppliedDiscounts.Select(discount => discount.Id).ToList();
-        //    manufacturerDto.RoleIds = _aclService.GetAclRecords(manufacturer).Select(acl => acl.CustomerRoleId).ToList();
-        //    manufacturerDto.StoreIds = _storeMappingService.GetStoreMappings(manufacturer).Select(mapping => mapping.StoreId)
-        //        .ToList();
-
-        //    var allLanguages = _languageService.GetAllLanguages();
-
-        //    manufacturerDto.LocalizedNames = new List<LocalizedNameDto>();
-
-        //    foreach (var language in allLanguages)
-        //    {
-        //        var localizedNameDto = new LocalizedNameDto
-        //        {
-        //            LanguageId = language.Id,
-        //            LocalizedName = _localizationService.GetLocalized(manufacturer, x => x.Name, language.Id)
-        //        };
-
-        //        manufacturerDto.LocalizedNames.Add(localizedNameDto);
-        //    }
-
-        //    return manufacturerDto;
-        //}
     }
 }

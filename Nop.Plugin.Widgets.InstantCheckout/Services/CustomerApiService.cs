@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Text.RegularExpressions;
@@ -54,14 +53,12 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Services
             _cacheManager = staticCacheManager;
         }
 
-        public IList<CustomerDto> GetCustomersDtos(DateTime? createdAtMin = null, DateTime? createdAtMax = null, int limit = Configurations.DefaultLimit,
-            int page = Configurations.DefaultPageValue, int sinceId = Configurations.DefaultSinceId)
+        public IList<CustomerDto> GetCustomersDtos(DateTime? createdAtMin = null, DateTime? createdAtMax = null, int limit = Configurations.DEFAULT_LIMIT,
+            int page = Configurations.DEFAULT_PAGE_VALUE, int sinceId = Configurations.DEFAULT_SINCE_ID)
         {
             var query = GetCustomersQuery(createdAtMin, createdAtMax, sinceId);
 
             var result = HandleCustomerGenericAttributes(null, query, limit, page);
-
-            SetNewsletterSubscribtionStatus(result);
 
             return result;
         }
@@ -73,8 +70,8 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Services
         }
 
         // Need to work with dto object so we can map the first and last name from generic attributes table.
-        public IList<CustomerDto> Search(string queryParams = "", string order = Configurations.DefaultOrder,
-            int page = Configurations.DefaultPageValue, int limit = Configurations.DefaultLimit)
+        public IList<CustomerDto> Search(string queryParams = "", string order = Configurations.DEFAULT_ORDER,
+            int page = Configurations.DEFAULT_PAGE_VALUE, int limit = Configurations.DEFAULT_LIMIT)
         {
             IList<CustomerDto> result = new List<CustomerDto>();
 
@@ -213,8 +210,6 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Services
                 }
             }
 
-            SetNewsletterSubscribtionStatus(customerDto);
-
             return customerDto;
         }
 
@@ -267,7 +262,7 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Services
         /// <param name="order"></param>
         /// <returns></returns>
         private IList<CustomerDto> HandleCustomerGenericAttributes(IReadOnlyDictionary<string, string> searchParams, IQueryable<Customer> query,
-            int limit = Configurations.DefaultLimit, int page = Configurations.DefaultPageValue, string order = Configurations.DefaultOrder)
+            int limit = Configurations.DEFAULT_LIMIT, int page = Configurations.DEFAULT_PAGE_VALUE, string order = Configurations.DEFAULT_ORDER)
         {
             // Here we join the GenericAttribute records with the customers and making sure that we are working only with the attributes
             // that are in the customers keyGroup and their keys are either first or last name.
@@ -329,7 +324,7 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Services
         /// This method is responsible for getting customer dto records with first and last names set from the attribute mappings.
         /// </summary>
         private IList<CustomerDto> GetFullCustomerDtos(IQueryable<IGrouping<int, CustomerAttributeMappingDto>> customerAttributesMappings,
-        int page = Configurations.DefaultPageValue, int limit = Configurations.DefaultLimit, string order = Configurations.DefaultOrder)
+        int page = Configurations.DEFAULT_PAGE_VALUE, int limit = Configurations.DEFAULT_LIMIT, string order = Configurations.DEFAULT_ORDER)
         {
             var customerDtos = new List<CustomerDto>();
 
@@ -468,56 +463,6 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Services
             }
 
             return defaultLanguageId;
-        }
-
-        [SuppressMessage("ReSharper", "PossibleMultipleEnumeration")]
-        private void SetNewsletterSubscribtionStatus(IList<CustomerDto> customerDtos)
-        {
-            if (customerDtos == null)
-            {
-                return;
-            }
-
-            var allNewsletterCustomerEmail = GetAllNewsletterCustomersEmails();
-
-            foreach (var customerDto in customerDtos)
-            {
-                SetNewsletterSubscribtionStatus(customerDto, allNewsletterCustomerEmail);
-            }
-        }
-
-        private void SetNewsletterSubscribtionStatus(BaseCustomerDto customerDto, IEnumerable<String> allNewsletterCustomerEmail = null)
-        {
-            if (customerDto == null || String.IsNullOrEmpty(customerDto.Email))
-            {
-                return;
-            }
-
-            if (allNewsletterCustomerEmail == null)
-            {
-                allNewsletterCustomerEmail = GetAllNewsletterCustomersEmails();
-            }
-
-            if (allNewsletterCustomerEmail != null && allNewsletterCustomerEmail.Contains(customerDto.Email.ToLowerInvariant()))
-            {
-                customerDto.SubscribedToNewsletter = true;
-            }
-        }
-
-        private IEnumerable<String> GetAllNewsletterCustomersEmails()
-        {
-            return _cacheManager.Get(Configurations.NEWSLETTER_SUBSCRIBERS_KEY, () =>
-            {
-                IEnumerable<String> subscriberEmails = (from nls in _subscriptionRepository.Table
-                                                        where nls.StoreId == _storeContext.CurrentStore.Id
-                                                              && nls.Active
-                                                        select nls.Email).ToList();
-
-
-                subscriberEmails = subscriberEmails.Where(e => !String.IsNullOrEmpty(e)).Select(e => e.ToLowerInvariant());
-
-                return subscriberEmails.Where(e => !String.IsNullOrEmpty(e)).Select(e => e.ToLowerInvariant());
-            });
         }
     }
 }

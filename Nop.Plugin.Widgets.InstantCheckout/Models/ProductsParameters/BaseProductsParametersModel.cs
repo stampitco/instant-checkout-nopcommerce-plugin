@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 
 namespace Nop.Plugin.Widgets.InstantCheckout.Models.ProductsParameters
 {
-    // JsonProperty is used only for swagger
     public class BaseProductsParametersModel
     {
         public BaseProductsParametersModel()

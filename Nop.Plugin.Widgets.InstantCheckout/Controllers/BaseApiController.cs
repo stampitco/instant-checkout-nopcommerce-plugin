@@ -20,15 +20,15 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
 {
     public class BaseApiController : Controller
     {
-        protected readonly IJsonFieldsSerializer JsonFieldsSerializer;
-        protected readonly IAclService AclService;
-        protected readonly ICustomerService CustomerService;
-        protected readonly IStoreMappingService StoreMappingService;
-        protected readonly IStoreService StoreService;
-        protected readonly IDiscountService DiscountService;
-        protected readonly ICustomerActivityService CustomerActivityService;
-        protected readonly ILocalizationService LocalizationService;
-        protected readonly IPictureService PictureService;
+        protected readonly IJsonFieldsSerializer _jsonFieldsSerializer;
+        protected readonly IAclService _aclService;
+        protected readonly ICustomerService _customerService;
+        protected readonly IStoreMappingService _storeMappingService;
+        protected readonly IStoreService _storeService;
+        protected readonly IDiscountService _discountService;
+        protected readonly ICustomerActivityService _customerActivityService;
+        protected readonly ILocalizationService _localizationService;
+        protected readonly IPictureService _pictureService;
 
         public BaseApiController(IJsonFieldsSerializer jsonFieldsSerializer,
             IAclService aclService,
@@ -40,15 +40,15 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
             ILocalizationService localizationService,
             IPictureService pictureService)
         {
-            JsonFieldsSerializer = jsonFieldsSerializer;
-            AclService = aclService;
-            CustomerService = customerService;
-            StoreMappingService = storeMappingService;
-            StoreService = storeService;
-            DiscountService = discountService;
-            CustomerActivityService = customerActivityService;
-            LocalizationService = localizationService;
-            PictureService = pictureService;
+            _jsonFieldsSerializer = jsonFieldsSerializer;
+            _aclService = aclService;
+            _customerService = customerService;
+            _storeMappingService = storeMappingService;
+            _storeService = storeService;
+            _discountService = discountService;
+            _customerActivityService = customerActivityService;
+            _localizationService = localizationService;
+            _pictureService = pictureService;
         }
 
         protected IActionResult Error(HttpStatusCode statusCode = (HttpStatusCode)422, string propertyKey = "", string errorMessage = "")
@@ -87,7 +87,7 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
                 Errors = errors
             };
 
-            var errorsJson = JsonFieldsSerializer.Serialize(errorsRootObject, null);
+            var errorsJson = _jsonFieldsSerializer.Serialize(errorsRootObject, null);
 
             return new ErrorActionResult(errorsJson, statusCode);
         }
@@ -101,22 +101,22 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
 
             entity.SubjectToAcl = passedRoleIds.Any();
 
-            var existingAclRecords = AclService.GetAclRecords(entity);
-            var allCustomerRoles = CustomerService.GetAllCustomerRoles(true);
+            var existingAclRecords = _aclService.GetAclRecords(entity);
+            var allCustomerRoles = _customerService.GetAllCustomerRoles(true);
             foreach (var customerRole in allCustomerRoles)
             {
                 if (passedRoleIds.Contains(customerRole.Id))
                 {
                     //new role
                     if (existingAclRecords.Count(acl => acl.CustomerRoleId == customerRole.Id) == 0)
-                        AclService.InsertAclRecord(entity, customerRole.Id);
+                        _aclService.InsertAclRecord(entity, customerRole.Id);
                 }
                 else
                 {
                     //remove role
                     var aclRecordToDelete = existingAclRecords.FirstOrDefault(acl => acl.CustomerRoleId == customerRole.Id);
                     if (aclRecordToDelete != null)
-                        AclService.DeleteAclRecord(aclRecordToDelete);
+                        _aclService.DeleteAclRecord(aclRecordToDelete);
                 }
             }
         }
@@ -128,22 +128,22 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
 
             entity.LimitedToStores = passedStoreIds.Any();
 
-            var existingStoreMappings = StoreMappingService.GetStoreMappings(entity);
-            var allStores = StoreService.GetAllStores();
+            var existingStoreMappings = _storeMappingService.GetStoreMappings(entity);
+            var allStores = _storeService.GetAllStores();
             foreach (var store in allStores)
             {
                 if (passedStoreIds.Contains(store.Id))
                 {
                     //new store
                     if (existingStoreMappings.Count(sm => sm.StoreId == store.Id) == 0)
-                        StoreMappingService.InsertStoreMapping(entity, store.Id);
+                        _storeMappingService.InsertStoreMapping(entity, store.Id);
                 }
                 else
                 {
                     //remove store
                     var storeMappingToDelete = existingStoreMappings.FirstOrDefault(sm => sm.StoreId == store.Id);
                     if (storeMappingToDelete != null)
-                        StoreMappingService.DeleteStoreMapping(storeMappingToDelete);
+                        _storeMappingService.DeleteStoreMapping(storeMappingToDelete);
                 }
             }
         }

@@ -9,7 +9,6 @@ using Nop.Plugin.Widgets.InstantCheckout.Factories;
 
 namespace Nop.Plugin.Widgets.InstantCheckout.Helpers
 {
-    // TODO: Think of moving the mapping helper in the delta folder
     public class MappingHelper : IMappingHelper
     {
         public void Merge(object source, object destination)

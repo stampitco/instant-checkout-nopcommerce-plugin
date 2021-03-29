@@ -6,15 +6,63 @@
     Html.AddCssFileParts("~/Plugins/Widgets.InstantCheckout/Content/instantcheckout/instant-checkout.css");
 }
 
+@if (Model.IsCart)
+{
+    <script>
+    // Create div
+    let ic_div = document.createElement("div");
+    ic_div.setAttribute("id", "stamp-ic-checkout-section");
+    ic_div.style.cssText = "display: inline-block; margin: 10px;";
 
-<div id="stamp-ic-checkout-section">
+    // Create hidden inputs
+    let ic_merchant_id = document.createElement("input");
+    ic_merchant_id.setAttribute("id", "stamp-ic-merchant-id");
+    ic_merchant_id.setAttribute("type", "hidden");
+    ic_merchant_id.value = "@Model.MerchantId";
 
-    <input id="stamp-ic-merchant-id" asp-for="MerchantId" type="hidden" />
-    <input id="stamp-ic-base-url" asp-for="InstantCheckoutBaseUrl" type="hidden" />
+    let ic_base_url = document.createElement("input");
+    ic_base_url.setAttribute("id", "stamp-ic-base-url");
+    ic_base_url.setAttribute("type", "hidden");
+    ic_base_url.value = "@Model.InstantCheckoutBaseUrl";
 
-    <button data-product-id="@Model.ProductId" class="button-@Model.ProductId add-to-cart-button stamp-ic-checkout-button" id="stamp-ic-checkout-button"
-            type="button" style="display:block;margin-bottom:15px;">
-        Instant Checkout
-    </button>
+    let ic_is_cart = document.createElement("input");
+    ic_is_cart.setAttribute("id", "stamp-ic-is-cart");
+    ic_is_cart.setAttribute("type", "hidden");
+    ic_is_cart.value = "@Model.IsCart";
 
-</div>
+    // Create Button for Shopping Cart
+    let btnIC = document.createElement("BUTTON");
+    btnIC.innerHTML = "Instant Checkout";
+    btnIC.classList.add("button-1");
+    btnIC.classList.add("checkout-button");
+    btnIC.classList.add("stamp-ic-checkout-button");
+    btnIC.setAttribute("id", "stamp-ic-checkout-button");
+    btnIC.setAttribute("data-products-ids", @Html.Raw(Json.Serialize(Model.Products)));
+
+    ic_div.appendChild(ic_merchant_id);
+    ic_div.appendChild(ic_base_url);
+    ic_div.appendChild(ic_is_cart);
+    ic_div.appendChild(btnIC);
+
+    document.addEventListener("DOMContentLoaded", function () {
+        $(".cart-footer .checkout-button").css("min-width", "10px");
+        var referenceNode = document.querySelector('#checkout');
+        referenceNode.after(ic_div);
+    });
+    </script>
+}
+else
+{
+    <div id="stamp-ic-checkout-section">
+
+        <input id="stamp-ic-merchant-id" asp-for="MerchantId" type="hidden" />
+        <input id="stamp-ic-base-url" asp-for="InstantCheckoutBaseUrl" type="hidden" />
+        <input id="stamp-ic-products" asp-for="Products" type="hidden" />
+        <input id="stamp-ic-is-cart" asp-for="IsCart" type="hidden" />
+
+        <button data-product-id="@Model.ProductId" class="button-@Model.ProductId add-to-cart-button stamp-ic-checkout-button" id="stamp-ic-checkout-button"
+                type="button" style="display:block;margin-bottom:15px;">
+            Instant Checkout
+        </button>
+    </div>
+}

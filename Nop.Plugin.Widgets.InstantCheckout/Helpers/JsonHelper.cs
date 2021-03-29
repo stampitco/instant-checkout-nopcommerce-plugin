@@ -38,13 +38,13 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Helpers
             var json = GetRequestBodyString(stream, rewindStream);
             if (string.IsNullOrEmpty(json))
             {
-                throw new InvalidOperationException(_localizationService.GetResource("Api.NoJsonProvided", _languageId, false));
+                throw new InvalidOperationException("No Json provided");
             }
 
             var requestBodyDictioanry = DeserializeToDictionary(json);
             if (requestBodyDictioanry == null || requestBodyDictioanry.Count == 0)
             {
-                throw new InvalidOperationException(_localizationService.GetResource("Api.InvalidJsonFormat", _languageId, false));
+                throw new InvalidOperationException("Json format is invalid");
             }
 
             return requestBodyDictioanry;

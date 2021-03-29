@@ -85,12 +85,12 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
                 return Unauthorized();
             }
 
-            if (parameters.Limit < Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
+            if (parameters.Limit < Configurations.MIN_LIMIT || parameters.Limit > Configurations.MAX_LIMIT)
             {
                 return Error(HttpStatusCode.BadRequest, "limit", "invalid limit parameter");
             }
 
-            if (parameters.Page < Configurations.DefaultPageValue)
+            if (parameters.Page < Configurations.DEFAULT_PAGE_VALUE)
             {
                 return Error(HttpStatusCode.BadRequest, "page", "invalid page parameter");
             }
@@ -98,7 +98,7 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
             var allProducts = _productApiService.GetProducts(parameters.Ids, parameters.CreatedAtMin, parameters.CreatedAtMax, parameters.UpdatedAtMin,
                                                                         parameters.UpdatedAtMax, parameters.Limit, parameters.Page, parameters.SinceId,
                                                                         parameters.PublishedStatus)
-                                                .Where(p => StoreMappingService.Authorize(p));
+                                                .Where(p => _storeMappingService.Authorize(p));
 
             IList<ProductDto> productsAsDtos = allProducts.Select(product => _dtoHelper.PrepareProductDTO(product)).ToList();
 
@@ -107,7 +107,7 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
                 Products = productsAsDtos
             };
 
-            var json = JsonFieldsSerializer.Serialize(productsRootObject, parameters.Fields);
+            var json = _jsonFieldsSerializer.Serialize(productsRootObject, parameters.Fields);
 
             return new RawJsonActionResult(json);
         }
@@ -164,10 +164,9 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
 
             productsRootObject.Products.Add(productDto);
 
-            var json = JsonFieldsSerializer.Serialize(productsRootObject, fields);
+            var json = _jsonFieldsSerializer.Serialize(productsRootObject, fields);
 
             return new RawJsonActionResult(json);
         }
-
     }
 }

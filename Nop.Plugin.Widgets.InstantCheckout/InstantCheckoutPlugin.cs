@@ -10,7 +10,7 @@ using Nop.Web.Framework.Infrastructure;
 namespace Nop.Plugin.Widgets.InstantCheckout
 {
     /// <summary>
-    /// PLugin
+    /// Plugin
     /// </summary>
     public class InstantCheckoutPlugin : BasePlugin, IWidgetPlugin
     {
@@ -34,7 +34,8 @@ namespace Nop.Plugin.Widgets.InstantCheckout
         /// <returns>Widget zones</returns>
         public IList<string> GetWidgetZones()
         {
-            return new List<string> { PublicWidgetZones.ProductDetailsInsideOverviewButtonsBefore };
+            return new List<string> { PublicWidgetZones.ProductDetailsInsideOverviewButtonsBefore,
+                PublicWidgetZones.OrderSummaryCartFooter};
         }
 
         /// <summary>

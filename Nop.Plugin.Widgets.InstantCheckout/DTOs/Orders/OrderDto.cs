@@ -12,8 +12,8 @@ namespace Nop.Plugin.Widgets.InstantCheckout.DTOs.Orders
     {
         private ICollection<OrderItemDto> _orderItems;
 
-        [JsonProperty("instant_checkout_order_id")]
-        public Guid InstantCheckoutOrderId { get; set; }
+        [JsonProperty("order_guid")]
+        public Guid OrderGuid { get; set; }
 
         [JsonProperty("store_id")]
         public int? StoreId { get; set; }

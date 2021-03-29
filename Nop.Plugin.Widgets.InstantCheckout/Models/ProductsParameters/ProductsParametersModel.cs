@@ -7,16 +7,15 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Models.ProductsParameters
 {
     using Microsoft.AspNetCore.Mvc;
 
-    // JsonProperty is used only for swagger
     [ModelBinder(typeof(ParametersModelBinder<ProductsParametersModel>))]
     public class ProductsParametersModel : BaseProductsParametersModel
     {
         public ProductsParametersModel()
         {
             Ids = null;
-            Limit = Configurations.DefaultLimit;
-            Page = Configurations.DefaultPageValue;
-            SinceId = Configurations.DefaultSinceId;
+            Limit = Configurations.DEFAULT_LIMIT;
+            Page = Configurations.DEFAULT_PAGE_VALUE;
+            SinceId = Configurations.DEFAULT_SINCE_ID;
             Fields = string.Empty;
         }
 

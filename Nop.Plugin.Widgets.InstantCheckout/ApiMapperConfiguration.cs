@@ -12,7 +12,6 @@ using Nop.Core.Domain.Stores;
 using Nop.Core.Infrastructure.Mapper;
 using Nop.Plugin.Api.MappingExtensions;
 using Nop.Plugin.Widgets.InstantCheckout.AutoMapper;
-using Nop.Plugin.Widgets.InstantCheckout.Domain;
 using Nop.Plugin.Widgets.InstantCheckout.DTOs;
 using Nop.Plugin.Widgets.InstantCheckout.DTOs.Categories;
 using Nop.Plugin.Widgets.InstantCheckout.DTOs.CustomerRoles;
@@ -29,7 +28,6 @@ using Nop.Plugin.Widgets.InstantCheckout.DTOs.ShoppingCarts;
 using Nop.Plugin.Widgets.InstantCheckout.DTOs.SpecificationAttributes;
 using Nop.Plugin.Widgets.InstantCheckout.DTOs.Stores;
 using Nop.Plugin.Widgets.InstantCheckout.MappingExtensions;
-using Nop.Plugin.Widgets.InstantCheckout.Models;
 
 namespace Nop.Plugin.Widgets.InstantCheckout
 {
@@ -37,9 +35,6 @@ namespace Nop.Plugin.Widgets.InstantCheckout
     {
         public ApiMapperConfiguration()
         {
-            CreateMap<ApiSettings, ConfigurationModel>();
-            CreateMap<ConfigurationModel, ApiSettings>();
-
             CreateMap<Category, CategoryDto>();
             CreateMap<CategoryDto, Category>();
 
@@ -54,8 +49,6 @@ namespace Nop.Plugin.Widgets.InstantCheckout
             CreateMap<CustomerRole, CustomerRoleDto>();
 
             CreateMap<Manufacturer, ManufacturerDto>();
-
-            //CreateClientToClientApiModelMap();
 
             CreateAddressMap();
             CreateAddressDtoToEntityMap();

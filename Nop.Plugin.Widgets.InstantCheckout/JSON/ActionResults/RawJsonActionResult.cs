@@ -8,7 +8,6 @@ namespace Nop.Plugin.Widgets.InstantCheckout.JSON.ActionResults
     using System.Text;
     using Microsoft.AspNetCore.WebUtilities;
 
-    // TODO: Move to BaseApiController as method.
     public class RawJsonActionResult : IActionResult
     {
         private readonly string _jsonString;

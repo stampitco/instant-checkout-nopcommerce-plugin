@@ -2,6 +2,6 @@
 {
     public class Plugin
     {
-        public const string SystemName = "Nop.Plugin.Widgets.InstantCheckout";
+        public const string SYSTEM_NAME = "Nop.Plugin.Widgets.InstantCheckout";
     }
 }

@@ -12,8 +12,8 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Services
         IList<Order> GetOrdersByCustomerId(int customerId);
 
         IList<Order> GetOrders(IList<int> ids = null, DateTime? createdAtMin = null, DateTime? createdAtMax = null,
-                               int limit = Configurations.DefaultLimit, int page = Configurations.DefaultPageValue,
-                               int sinceId = Configurations.DefaultSinceId, OrderStatus? status = null, PaymentStatus? paymentStatus = null,
+                               int limit = Configurations.DEFAULT_LIMIT, int page = Configurations.DEFAULT_PAGE_VALUE,
+                               int sinceId = Configurations.DEFAULT_SINCE_ID, OrderStatus? status = null, PaymentStatus? paymentStatus = null,
                                ShippingStatus? shippingStatus = null, int? customerId = null, int? storeId = null);
 
         Order GetOrderById(int orderId);

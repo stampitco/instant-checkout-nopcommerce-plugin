@@ -6,7 +6,6 @@ using Nop.Core.Domain.Shipping;
 
 namespace Nop.Plugin.Widgets.InstantCheckout.Models.OrdersParameters
 {
-    // JsonProperty is used only for swagger
     public class BaseOrdersParametersModel
     {
         public BaseOrdersParametersModel()

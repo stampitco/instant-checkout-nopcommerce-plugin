@@ -28,12 +28,12 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Maps
 
         public Dictionary<string, Tuple<string, Type>> GetMap(Type type)
         {
-            if (!StaticCacheManager.IsSet(Configurations.JsonTypeMapsPattern))
+            if (!StaticCacheManager.IsSet(Configurations.JSON_TYPE_MAPS_PATTERN))
             {
-                StaticCacheManager.Set(Configurations.JsonTypeMapsPattern, new Dictionary<string, Dictionary<string, Tuple<string, Type>>>(), int.MaxValue);
+                StaticCacheManager.Set(Configurations.JSON_TYPE_MAPS_PATTERN, new Dictionary<string, Dictionary<string, Tuple<string, Type>>>(), int.MaxValue);
             }
 
-            var typeMaps = StaticCacheManager.Get<Dictionary<string, Dictionary<string, Tuple<string, Type>>>>(Configurations.JsonTypeMapsPattern, () => null);
+            var typeMaps = StaticCacheManager.Get<Dictionary<string, Dictionary<string, Tuple<string, Type>>>>(Configurations.JSON_TYPE_MAPS_PATTERN, () => null);
 
             if (!typeMaps.ContainsKey(type.Name))
             {
@@ -46,7 +46,7 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Maps
         private void Build(Type type)
         {
             var typeMaps =
-                StaticCacheManager.Get<Dictionary<string, Dictionary<string, Tuple<string, Type>>>>(Configurations.JsonTypeMapsPattern, () => null);
+                StaticCacheManager.Get<Dictionary<string, Dictionary<string, Tuple<string, Type>>>>(Configurations.JSON_TYPE_MAPS_PATTERN, () => null);
 
             var mapForCurrentType = new Dictionary<string, Tuple<string, Type>>();
 

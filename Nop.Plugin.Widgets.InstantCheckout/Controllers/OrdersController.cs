@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Nop.Core;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Orders;
-using Nop.Core.Infrastructure;
 using Nop.Plugin.Widgets.InstantCheckout.Attributes;
 using Nop.Plugin.Widgets.InstantCheckout.Constants;
 using Nop.Plugin.Widgets.InstantCheckout.Delta;
@@ -34,6 +33,7 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
 {
     using DTOs.Errors;
     using JSON.Serializers;
+    using Nop.Core.Domain.Shipping;
     using Nop.Plugin.Widgets.InstantCheckout.HeaderExtensions;
     using Nop.Plugin.Widgets.InstantCheckout.Models.OrdersParameters;
     using Nop.Services.Configuration;
@@ -54,12 +54,7 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
         private readonly IStoreContext _storeContext;
         private readonly IFactory<Order> _factory;
         private readonly ICountryService _countryService;
-
-        // We resolve the order settings this way because of the tests.
-        // The auto mocking does not support concreate types as dependencies. It supports only interfaces.
-        private OrderSettings _orderSettings;
-
-        private OrderSettings OrderSettings => _orderSettings ?? (_orderSettings = EngineContext.Current.Resolve<OrderSettings>());
+        private readonly ILocalizationService _localizationService;
 
         public OrdersController(ISettingService settingService,
             IOrderApiService orderApiService,
@@ -99,6 +94,7 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
             _productService = productService;
             _productAttributeConverter = productAttributeConverter;
             _countryService = countryService;
+            _localizationService = localizationService;
         }
 
         /// <summary>
@@ -120,10 +116,10 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
                 return Unauthorized();
             }
 
-            if (parameters.Page < Configurations.DefaultPageValue)
+            if (parameters.Page < Configurations.DEFAULT_PAGE_VALUE)
                 return Error(HttpStatusCode.BadRequest, "page", "Invalid page parameter");
 
-            if (parameters.Limit < Configurations.MinLimit || parameters.Limit > Configurations.MaxLimit)
+            if (parameters.Limit < Configurations.MIN_LIMIT || parameters.Limit > Configurations.MAX_LIMIT)
                 return Error(HttpStatusCode.BadRequest, "page", "Invalid limit parameter");
 
             var storeId = _storeContext.CurrentStore.Id;
@@ -141,7 +137,7 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
                 Orders = ordersAsDtos
             };
 
-            var json = JsonFieldsSerializer.Serialize(ordersRootObject, parameters.Fields);
+            var json = _jsonFieldsSerializer.Serialize(ordersRootObject, parameters.Fields);
 
             return new RawJsonActionResult(json);
         }
@@ -181,7 +177,7 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
             var orderDto = _dtoHelper.PrepareOrderDTO(order);
             ordersRootObject.Orders.Add(orderDto);
 
-            var json = JsonFieldsSerializer.Serialize(ordersRootObject, fields);
+            var json = _jsonFieldsSerializer.Serialize(ordersRootObject, fields);
 
             return new RawJsonActionResult(json);
         }
@@ -221,7 +217,7 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
             var orderDto = _dtoHelper.PrepareOrderDTO(order);
             ordersRootObject.Orders.Add(orderDto);
 
-            var json = JsonFieldsSerializer.Serialize(ordersRootObject, fields);
+            var json = _jsonFieldsSerializer.Serialize(ordersRootObject, fields);
 
             return new RawJsonActionResult(json);
         }
@@ -248,7 +244,7 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
             //    return Error();
 
             //TODO Add Guest Customer
-            var customer = CustomerService.InsertGuestCustomer();
+            var customer = _customerService.InsertGuestCustomer();
 
             // We doesn't have to check for value because this is done by the order validator.
             //var customer = CustomerService.GetCustomerById(orderDelta.Dto.CustomerId.Value);
@@ -299,6 +295,29 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
             customer.BillingAddress = newOrder.BillingAddress;
             customer.ShippingAddress = newOrder.ShippingAddress;
 
+
+            //Set the default Pickup Point
+
+            if (orderDelta.Dto.ShippingRateComputationMethodSystemName == "Pickup.PickupInStore")
+            {
+                var pickupPoints = _shippingService.GetPickupPoints(customer.BillingAddress,
+                customer, null, _storeContext.CurrentStore.Id).PickupPoints.ToList();
+                var selectedPoint = pickupPoints.FirstOrDefault();
+                if (selectedPoint == null)
+                    return RedirectToRoute("CheckoutShippingAddress");
+
+                var pickUpInStoreShippingOption = new ShippingOption
+                {
+                    Name = string.Format(_localizationService.GetResource("Checkout.PickupPoints.Name"), selectedPoint.Name),
+                    Rate = selectedPoint.PickupFee,
+                    Description = selectedPoint.Description,
+                    ShippingRateComputationMethodSystemName = selectedPoint.ProviderSystemName
+                };
+
+                _genericAttributeService.SaveAttribute(customer, NopCustomerDefaults.SelectedShippingOptionAttribute, pickUpInStoreShippingOption, _storeContext.CurrentStore.Id);
+                _genericAttributeService.SaveAttribute(customer, NopCustomerDefaults.SelectedPickupPointAttribute, selectedPoint, _storeContext.CurrentStore.Id);
+            }
+
             // If the customer has something in the cart it will be added too. Should we clear the cart first? 
             newOrder.Customer = customer;
 
@@ -306,7 +325,7 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
             if (!orderDelta.Dto.StoreId.HasValue)
                 newOrder.StoreId = _storeContext.CurrentStore.Id;
 
-            var placeOrderResult = PlaceOrder(orderDelta.Dto.InstantCheckoutOrderId, newOrder, customer);
+            var placeOrderResult = PlaceOrder(orderDelta.Dto.OrderGuid, newOrder, customer);
 
             if (!placeOrderResult.Success)
             {
@@ -316,17 +335,17 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
                 return Error(HttpStatusCode.BadRequest);
             }
 
-            CustomerActivityService.InsertActivity("AddNewOrder",
-                 LocalizationService.GetResource("ActivityLog.AddNewOrder"), newOrder);
+            _customerActivityService.InsertActivity("AddNewOrder",
+                 base._localizationService.GetResource("ActivityLog.AddNewOrder"), newOrder);
 
             var ordersRootObject = new OrdersRootObject();
 
             var placedOrderDto = _dtoHelper.PrepareOrderDTO(placeOrderResult.PlacedOrder);
-            placedOrderDto.InstantCheckoutOrderId = placeOrderResult.PlacedOrder.OrderGuid;
+            placedOrderDto.OrderGuid = placeOrderResult.PlacedOrder.OrderGuid;
 
             ordersRootObject.Orders.Add(placedOrderDto);
 
-            var json = JsonFieldsSerializer.Serialize(ordersRootObject, string.Empty);
+            var json = _jsonFieldsSerializer.Serialize(ordersRootObject, string.Empty);
 
             return new RawJsonActionResult(json);
         }
@@ -359,7 +378,7 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
             var ordersRootObject = new OrdersRootObject();
             var cancelledOrderDto = _dtoHelper.PrepareOrderDTO(orderToCancel);
             ordersRootObject.Orders.Add(cancelledOrderDto);
-            var json = JsonFieldsSerializer.Serialize(ordersRootObject, string.Empty);
+            var json = _jsonFieldsSerializer.Serialize(ordersRootObject, string.Empty);
 
             return new RawJsonActionResult(json);
         }
@@ -407,7 +426,30 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
                 }
 
                 if (isValid)
+                {
+                    //Set the default Pickup Point
+
+                    if (orderDelta.Dto.ShippingRateComputationMethodSystemName == "Pickup.PickupInStore")
+                    {
+                        var pickupPoints = _shippingService.GetPickupPoints(customer.BillingAddress,
+                        customer, null, _storeContext.CurrentStore.Id).PickupPoints.ToList();
+                        var selectedPoint = pickupPoints.FirstOrDefault();
+                        if (selectedPoint == null)
+                            return RedirectToRoute("CheckoutShippingAddress");
+
+                        var pickUpInStoreShippingOption = new ShippingOption
+                        {
+                            Name = string.Format(_localizationService.GetResource("Checkout.PickupPoints.Name"), selectedPoint.Name),
+                            Rate = selectedPoint.PickupFee,
+                            Description = selectedPoint.Description,
+                            ShippingRateComputationMethodSystemName = selectedPoint.ProviderSystemName
+                        };
+
+                        _genericAttributeService.SaveAttribute(customer, NopCustomerDefaults.SelectedShippingOptionAttribute, pickUpInStoreShippingOption, _storeContext.CurrentStore.Id);
+                        _genericAttributeService.SaveAttribute(customer, NopCustomerDefaults.SelectedPickupPointAttribute, selectedPoint, _storeContext.CurrentStore.Id);
+                    }
                     currentOrder.ShippingMethod = orderDelta.Dto.ShippingMethod;
+                }
                 else
                     return Error(HttpStatusCode.BadRequest);
             }
@@ -419,8 +461,8 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
 
             _orderService.UpdateOrder(currentOrder);
 
-            CustomerActivityService.InsertActivity("UpdateOrder",
-                 LocalizationService.GetResource("ActivityLog.UpdateOrder"), currentOrder);
+            _customerActivityService.InsertActivity("UpdateOrder",
+                 base._localizationService.GetResource("ActivityLog.UpdateOrder"), currentOrder);
 
             var ordersRootObject = new OrdersRootObject();
 
@@ -429,7 +471,7 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
 
             ordersRootObject.Orders.Add(placedOrderDto);
 
-            var json = JsonFieldsSerializer.Serialize(ordersRootObject, string.Empty);
+            var json = _jsonFieldsSerializer.Serialize(ordersRootObject, string.Empty);
 
             return new RawJsonActionResult(json);
         }
@@ -441,7 +483,7 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
         [ProducesResponseType(typeof(ErrorsRootObject), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ErrorsRootObject), 422)]
-        public IActionResult UpdateOrderAsPaid(int orderId)
+        public IActionResult UpdateOrderAsPaid(int id)
         {
             if (!IsRequestAuthorized())
             {
@@ -452,14 +494,14 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
             if (!ModelState.IsValid)
                 return Error();
 
-            var orderPaid = MarkOrderAsPaid(orderId);
+            var orderPaid = MarkOrderAsPaid(id);
 
             if (!orderPaid)
             {
                 return Error(HttpStatusCode.NotFound, "order", "not found");
             }
 
-            var currentOrder = _orderApiService.GetOrderById(orderId);
+            var currentOrder = _orderApiService.GetOrderById(id);
 
             var ordersRootObject = new OrdersRootObject();
 
@@ -467,7 +509,7 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
 
             ordersRootObject.Orders.Add(placedOrderDto);
 
-            var json = JsonFieldsSerializer.Serialize(ordersRootObject, string.Empty);
+            var json = _jsonFieldsSerializer.Serialize(ordersRootObject, string.Empty);
 
             return new RawJsonActionResult(json);
         }
