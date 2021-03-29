@@ -4,7 +4,6 @@ using Nop.Plugin.Widgets.InstantCheckout.Models;
 using Nop.Plugin.Widgets.InstantCheckout.Services;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
-using Nop.Services.Messages;
 using Nop.Services.Security;
 using Nop.Web.Framework;
 using Nop.Web.Framework.Controllers;
@@ -15,21 +14,18 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
     public class WidgetsInstantCheckoutController : BasePluginController
     {
         private readonly ILocalizationService _localizationService;
-        private readonly INotificationService _notificationService;
         private readonly IPermissionService _permissionService;
         private readonly ISettingService _settingService;
         private readonly IStoreContext _storeContext;
         private readonly InstantCheckoutManager _instantCheckoutManager;
 
         public WidgetsInstantCheckoutController(ILocalizationService localizationService,
-            INotificationService notificationService,
             IPermissionService permissionService,
             ISettingService settingService,
             IStoreContext storeContext,
             InstantCheckoutManager instantCheckoutManager)
         {
             _localizationService = localizationService;
-            _notificationService = notificationService;
             _permissionService = permissionService;
             _settingService = settingService;
             _storeContext = storeContext;
@@ -39,7 +35,9 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
         public IActionResult Configure()
         {
             if (!_permissionService.Authorize(StandardPermissionProvider.ManageWidgets))
+            {
                 return AccessDeniedView();
+            }
 
             //load settings for a chosen store scope
             var storeScope = _storeContext.ActiveStoreScopeConfiguration;
@@ -70,7 +68,9 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
         public IActionResult Configure(ConfigurationModel model)
         {
             if (!_permissionService.Authorize(StandardPermissionProvider.ManageWidgets))
+            {
                 return AccessDeniedView();
+            }
 
             //load settings for a chosen store scope
             var storeScope = _storeContext.ActiveStoreScopeConfiguration;
@@ -99,7 +99,7 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
                 instantCheckoutSettings.MerchantId.ToString(), instantCheckoutSettings.ConsumerKey.ToString(),
                 instantCheckoutSettings.ConsumerSecret.ToString());
 
-            _notificationService.SuccessNotification(_localizationService.GetResource("Admin.Plugins.Saved"));
+            SuccessNotification(_localizationService.GetResource("Admin.Plugins.Saved"));
             return Configure();
         }
     }

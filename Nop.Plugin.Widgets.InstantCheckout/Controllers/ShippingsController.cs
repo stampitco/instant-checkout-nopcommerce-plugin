@@ -1,17 +1,14 @@
-﻿using System.Net;
-using Nop.Services.Customers;
+﻿using Nop.Services.Customers;
 using Nop.Services.Discounts;
 using Nop.Services.Localization;
 using Nop.Services.Logging;
 using Nop.Services.Media;
 using Nop.Services.Security;
 using Nop.Services.Stores;
+using System.Net;
 
 namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using Microsoft.AspNetCore.Mvc;
     using Nop.Core;
     using Nop.Core.Domain.Common;
@@ -31,6 +28,9 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
     using Nop.Services.Shipping;
     using Nop.Services.Tax;
     using Nop.Web.Models.ShoppingCart;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using static Nop.Plugin.Widgets.InstantCheckout.Models.ShippingsParameters.ShippingOptionsViewModel;
 
     public class ShippingsController : BaseApiController
@@ -178,10 +178,14 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
                 }
             }
             else
+            {
                 foreach (var error in getShippingOptionResponse.Errors)
+                {
                     model.Warnings.Add(error);
+                }
+            }
 
-            if (_shippingSettings.AllowPickupInStore)
+            if (_shippingSettings.AllowPickUpInStore)
             {
                 var pickupPointsResponse = _shippingService.GetPickupPoints(address, _workContext.CurrentCustomer, storeId: _storeContext.CurrentStore.Id);
                 if (pickupPointsResponse.Success)
@@ -205,8 +209,12 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Controllers
                     }
                 }
                 else
+                {
                     foreach (var error in pickupPointsResponse.Errors)
+                    {
                         model.Warnings.Add(error);
+                    }
+                }
             }
 
             return Ok(model);

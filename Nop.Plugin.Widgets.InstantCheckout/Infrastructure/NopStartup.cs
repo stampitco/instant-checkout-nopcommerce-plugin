@@ -3,7 +3,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Nop.Core.Infrastructure;
 using Nop.Plugin.Widgets.InstantCheckout.Services;
-using Nop.Web.Framework.Infrastructure.Extensions;
 
 namespace Nop.Plugin.Widgets.InstantCheckout.Infrastructure
 {
@@ -20,7 +19,7 @@ namespace Nop.Plugin.Widgets.InstantCheckout.Infrastructure
         public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
             //client for instant checkout service
-            services.AddHttpClient<InstantCheckoutService>().WithProxy();
+            services.AddHttpClient<InstantCheckoutService>();
         }
 
         /// <summary>
